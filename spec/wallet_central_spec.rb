@@ -1,5 +1,5 @@
 require_relative '../lib/wallet_central'
-
+require 'pry'
 RSpec.describe "WalletCentral" do
  
 
@@ -9,13 +9,13 @@ RSpec.describe "WalletCentral" do
     
       it "shows only client's wallets" do
         expected_response = {"EUR"=>"868.65", "USD"=>"463.39"}
-        expect(WalletCentral.output_client("jon")).to eq expected_response
+        expect(WalletCentral.find_client("jon")).to eq expected_response
       end
     end
 
     context "with an non existing client" do
       it "return Not found message" do
-        expect(WalletCentral.output_client("jose")).to eq "Not found"
+        expect(WalletCentral.find_client("jose")).to eq "Not found"
       end
     end
 
@@ -53,6 +53,23 @@ RSpec.describe "WalletCentral" do
         
       end
     end
+
+    context "when client does not have enough money" do
+      it "returns a 'Not enough funds' error message" do
+        errors = WalletCentral.transfer('jon', 'aray', "USD", "2000")
+
+        expect(errors).to include("Client jon does not have enough funds.")
+      end
+    end
+
+    context "when client does not have a wallet with a required currency" do
+      it "returns a 'Not required currency wallet' message" do
+        errors = WalletCentral.transfer('jon', 'aray', "BRL", "20")
+
+        expect(errors).to include("Client jon does not have a BRL wallet.")
+      end
+    end
+    
   end
 
 

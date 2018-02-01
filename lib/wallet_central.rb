@@ -5,17 +5,13 @@ require 'client'
 class WalletCentral
 
   def self.output 
-    puts JSON.pretty_generate(wallets)
-  end
-
-  def self.output_client(client)
-    client = Client.find_all[client]
-    return "Not found" if client.nil?
-    client
+    puts JSON.pretty_generate(Client.find_all)
   end
 
   def self.find_client(client)
-    Client.find_all[client]
+    client = Client.find_all[client]
+    return "Not found" if client.nil?
+    client
   end
 
   def self.transfer(from, to, currency, amount)

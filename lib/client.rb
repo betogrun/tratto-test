@@ -51,8 +51,11 @@ class Client
 
   def validate_transfer(currency, amount)
     wallet = self.wallets.find {|wallet| wallet.currency == currency }
-    self.error_messages << "Client #{self.name} does not have a #{currency} wallet." if wallet.nil? 
-    self.error_messages << "Client #{self.name} does not have enough funds." if wallet.amount.to_f < amount.to_f
+    if wallet.nil?
+      self.error_messages << "Client #{self.name} does not have a #{currency} wallet."  
+    elsif wallet.amount.to_f < amount.to_f
+      self.error_messages << "Client #{self.name} does not have enough funds." 
+    end
   end
 
   def self.build(client_name)
