@@ -9,9 +9,7 @@ class WalletCentral
   end
 
   def self.find_client(client)
-    client = Client.find_all[client]
-    return "Not found" if client.nil?
-    client
+    Client.find_by_name(client)
   end
 
   def self.transfer(from, to, currency, amount)

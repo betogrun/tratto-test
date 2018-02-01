@@ -10,6 +10,17 @@ class Client
     @error_messages = []
   end
 
+  def as_json(options={})
+  {
+	  name: @name,
+	  wallets: @wallets.map {|w| [w.currency, w.amount] }.to_h
+  }
+ end
+  
+  def to_json(*options)
+   as_json(*options).to_json(*options)
+  end
+
   def save
     self.wallets.each do |wallet|
       $records[self.name][wallet.currency] = wallet.amount
@@ -17,11 +28,16 @@ class Client
   end
 
   def self.find_by_name(name)
+    return "Client #{name} not found" if records[name].nil?
     self.build(name)
   end
 
   def self.find_all
-    records
+    records.map {|k,v| build(k)}
+  end
+
+  def wallet(currency)
+    self.wallets.find {|w| w.currency == currency }
   end
 
 
@@ -30,10 +46,9 @@ class Client
     validate_transfer(currency, amount)
     return false unless self.error_messages.empty?
     
-    from_wallet = self.wallets.find {|w| w.currency == currency }
+    from_wallet = wallet(currency)
     
-    to_wallet = other_client.wallets.find {|w| w.currency == currency } ||
-      other_client.wallets.first
+    to_wallet = other_client.wallet(currency) || other_client.wallets.first
     
     if from_wallet.currency == to_wallet.currency
       to_wallet.amount = (to_wallet.amount.to_f + amount.to_f).to_s
@@ -50,7 +65,7 @@ class Client
   private
 
   def validate_transfer(currency, amount)
-    wallet = self.wallets.find {|wallet| wallet.currency == currency }
+    wallet = wallet(currency)
     if wallet.nil?
       self.error_messages << "Client #{self.name} does not have a #{currency} wallet."  
     elsif wallet.amount.to_f < amount.to_f
